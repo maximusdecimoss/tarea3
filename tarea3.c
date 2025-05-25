@@ -194,7 +194,7 @@ void initialize_player(Player* p) {
     p->inventory = list_create(); // creamos una mochila vacia
     p->total_weight = 0.0; // la mochila no pesa nada
     p->total_score = 0; // tiene 0 puntos
-    p->time_left = 10; // le damos 10 turnos
+    p->time_left = 15; // le damos 15 turnos
     p->path = stack_create(NULL); // creamos una pila para su camino ya que el jugador puede volver a habitaciones anteriores
     int* id = malloc(sizeof(int)); // creamos un numero ya que la pila guarda numeros en vez de objetos siendo es un poco mas eficiente en este caso
     *id = 1; // ponemos la habitacion 1
