@@ -52,7 +52,7 @@ Al iniciar GraphQuest, ves un menú principal con cuatro opciones:
 - Salir: Terminas el juego.
 / Pistas: Intenta mostrarte pistas, pero necesitas estar en una partida para usarlas.
 
-Si eliges "Iniciar Partida", decides cuántos jugadores (1 o 2). Luego, cada jugador comienza en la primera habitación con 10 turnos. En cada turno, ves:
+Si eliges "Iniciar Partida", decides cuántos jugadores (1 o 2). Luego, cada jugador comienza en la primera habitación con 15 turnos. En cada turno, ves:
 
 - La descripción de la habitación, como "Una puerta rechinante cruje al entrar".
 - Los objetos en el suelo, como una espada o un rubí, con su peso y valor en puntos.
@@ -137,31 +137,41 @@ Cuando terminas el juego, ves una tabla con los resultados, algo así:
 
 +---------+---------+--------+
 
-La tabla organiza los puntajes de forma clara, mostrando quién jugó, cuántos puntos ganó y su nivel. Usamos este formato porque es fácil de leer en la consola, con líneas y columnas que dan orden, como un cuadro en un cuaderno. Es especialmente útil con dos jugadores, para comparar resultados.
+La tabla organiza los puntajes de forma clara, mostrando quién jugó, cuántos puntos ganó y su nivel. 
+
+Usamos este formato porque es fácil de leer en la consola, con líneas y columnas que dan orden, como un cuadro en un cuaderno. Es especialmente útil con dos jugadores, para comparar resultados.
+
+
 ¿Por qué tantos comentarios en el código?
-El juego usa ideas avanzadas, como mapas (para encontrar habitaciones rápido), listas (para guardar objetos), pilas (para recordar tu camino) y colas (para turnos entre jugadores). Estas ideas son como un rompecabezas complejo, así que comentamos casi cada línea del código para explicar qué hace y por qué. Por ejemplo:
 
-Explicamos que una habitación se guarda en un mapa para buscarla rápido.
-Detallamos cómo moverte usa las teclas w, s, a, d para que sea intuitivo.
-Aclaramos por qué guardamos el camino en una pila, para que puedas volver atrás si quieres.
+El juego usa ideas avanzadas, como mapas (para encontrar habitaciones rápido), listas (para guardar objetos), pilas (para recordar tu camino) y colas (para turnos entre jugadores). 
 
-Los comentarios son como un guía turístico: te llevan paso a paso por el código, especialmente porque los mapas y grafos pueden ser confusos. Esto ayuda a cualquiera que quiera entender o mejorar el juego, como un compañero de equipo o un profesor.
+Estas ideas son como un rompecabezas complejo, así que comentamos casi cada línea del código para explicar qué hace y por qué. Por ejemplo:
+
+- Explicamos que una habitación se guarda en un mapa para buscarla rápido.
+- Detallamos cómo moverte usa las teclas w, s, a, d para que sea intuitivo.
+- Aclaramos por qué guardamos el camino en una pila, para que puedas volver atrás si quieres.
+
+Los comentarios son como un guía turístico: te llevan paso a paso por el código, especialmente porque los mapas y grafos pueden ser confusos. 
+Esto ayuda a cualquiera que quiera entender o mejorar el juego, ya que al ser publico cualquiera esta autorizado de aportar nuevas ideas.
 
 
 Notas importantes:
 
-Asegúrate de que graphquest.csv esté en la carpeta correcta, o el juego no cargará el laberinto.
-Guarda todos los archivos en formato de texto simple (UTF-8 sin BOM) para evitar errores.
-Si el juego no compila, revisa los errores mencionados más abajo.
+- Asegúrate de que graphquest.csv esté en la carpeta correcta, o el juego no cargará el laberinto.
+- Guarda todos los archivos en formato de texto simple (UTF-8 sin BOM) para evitar errores.
+
 
 
 
 Ejemplo de una partida
+
+
 Imagina que inicias el juego:
 
-Eliges "Iniciar Partida" y seleccionas 1 jugador.
-Ves que estás en la habitación "Inicio", con una espada en el suelo (5 kg, 2 puntos). Tienes 10 turnos y puedes ir hacia abajo.
-Escoges "Recoger item" y tomas la espada. Ahora tu mochila tiene la espada, tu peso es 5 kg, tu puntaje es 2, y te quedan 9 turnos.
+- Eliges "Iniciar Partida" y seleccionas 1 jugador.
+- Ves que estás en la habitación "Inicio", con una espada en el suelo (5 kg, 2 puntos). Tienes 10 turnos y puedes ir hacia abajo.
+- Escoges "Recoger item" y tomas la espada. Ahora tu mochila tiene la espada, tu peso es 5 kg, tu puntaje es 2, y te quedan 14 turnos.
 Eliges "Pistas" y seleccionas el nivel Bronce. Resuelves un acertijo (respondes 23) y obtienes una ruta: "Ve al sur, luego al este". Te quedan 8 turnos.
 Escoges "Moverse" y presionas s para ir abajo a un "Pasadizo Oscuro". Como llevas 5 kg, gastas 1 turno, quedándote con 7.
 Continúas hasta llegar a la habitación final (número 16). Ganas, y ves:¡HAZ GANADO! Eres un explorador indomable
@@ -177,48 +187,57 @@ Eliges "Volver al menú principal", pero el juego se cierra (un error conocido).
 
 Problemas conocidos
 
-El menú final no vuelve al menú principal:
+- El menú final no vuelve al menú principal:
 
-Cuando terminas el juego (ganas o pierdes), ves un menú con dos opciones: "Volver al menú principal" o "Salir". Si eliges "Volver al menú principal", el juego se cierra en lugar de regresar al inicio. Esto frustra porque esperas seguir jugando.
+Cuando terminas el juego (ganas o pierdes), ves un menú con dos opciones: "Volver al menú principal" o "Salir". 
+
+Si eliges "Volver al menú principal", el juego se cierra en lugar de regresar al inicio. Esto frustra porque esperas seguir jugando.
 Por qué pasa: El programa usa una instrucción que termina todo en lugar de reiniciar el menú.
-Cómo arreglarlo: Los desarrolladores podrían cambiar esa instrucción para que regrese al menú principal, como cuando eliges "Reiniciar partida".
 
+- Error al precionar enter :
 
-Error al buscar la habitación del jugador:
+  En algunos casos del codigo la tecla enter no se cierra correctamente , se deberia crear una linea de codigo que limite la cantidad de veces que esta permitido presionar la tecla enter. para no generar tantos espacios sin uso
+  
 
-Hay un problema en el programa que impide compilarlo porque usa un símbolo raro (¤) al buscar en qué habitación está el jugador.
-Por qué pasa: Parece un error de tipeo en el código.
-Cómo arreglarlo: Cambiar ese símbolo por la referencia correcta al jugador actual.
-
-
-El archivo del laberinto puede causar errores:
+- El archivo del laberinto puede causar errores:
 
 El programa lee el laberinto desde graphquest.csv, pero no revisa si el archivo tiene errores, como nombres de objetos muy largos o números inválidos. Esto puede hacer que el juego falle.
 Por qué pasa: No hay suficientes comprobaciones para datos incorrectos.
+
 Cómo arreglarlo: Añadir reglas que revisen el archivo antes de usarlo, como limitar la longitud de los nombres o asegurarse de que los números sean válidos.
 
 
-Puedes llevar peso infinito:
+- Puedes llevar peso infinito:
 
 No hay límite para cuántos objetos puedes recoger, lo que te permite acumular peso sin restricción. Esto hace que moverte sea muy lento, gastando muchos turnos.
+
 Por qué pasa: El juego no establece un peso máximo para la mochila.
+
 Cómo arreglarlo: Poner un límite, como 50 kg, y avisar si intentas recoger algo que lo exceda.
 
 
 
 ¿Por qué este diseño?
 
-Pistas con acertijos: Elegimos acertijos matemáticos para las pistas porque añaden un desafío intelectual, como resolver un enigma en una aventura real. Los niveles Oro, Plata y Bronce hacen que las pistas sean emocionantes, como si desbloquearas secretos de mayor valor.
+Pistas con acertijos: Se opto por añadir pistas con acertijos matemáticos para las mismas porque añaden un desafío intelectual, como resolver un enigma en una aventura real. Los niveles Oro, Plata y Bronce hacen que las pistas sean emocionantes, como si desbloquearas secretos de mayor valor.
+
+
 Tablas para resultados: Mostrar los puntajes en una tabla con bordes es como presentar un trofeo al final. Es claro, ordenado y te hace sentir que tu esfuerzo se reconoce.
-Comentarios detallados: Como el juego usa mapas y conexiones complicadas (piensa en un laberinto con flechas entre habitaciones), explicamos cada paso en el código. Esto es como dejar notas en un mapa del tesoro, para que cualquiera pueda seguirlo.
+
+Comentarios detallados: Como el juego usa mapas y conexiones complicadas (piensa en un laberinto con flechas entre habitaciones), se opto por detallar cada paso en el código. Esto es como dejar notas en un mapa , para que cualquiera pueda seguirlo.
+
 Niveles de puntaje: Oro, Plata y Bronce dan un objetivo claro, como ganar una medalla. Hacen que quieras jugar mejor para alcanzar el nivel más alto.
 
 Qué hacer si algo falla
 
 Si no compila: Revisa el error en la terminal. Si menciona un símbolo raro (¤), necesitarás corregir esa línea en el archivo principal. Pide ayuda a alguien que sepa programar si no estás seguro.
+
 Si el laberinto no carga: Asegúrate de que graphquest.csv esté en la carpeta C:\Users\TuNombre\tarea3. Verifica que tenga el formato correcto, con columnas para ID, nombre, descripción, objetos, conexiones y si es la habitación final.
+
 Si el juego se cierra al volver al menú: Es un error conocido. Por ahora, elige "Salir" y reinicia el juego manualmente.
+
 Si llevas demasiado peso: Sé estratégico y descarta objetos pesados que no valgan muchos puntos.
 
 Conclusión
-GraphQuest es una aventura donde tus decisiones importan: ¿llevas esa espada pesada o la dejas? ¿resuelves un acertijo para encontrar el camino? Con su laberinto dinámico, pistas ingeniosas y tabla de resultados, te reta a ser un explorador astuto. Aunque tiene algunos errores, como el menú final que no regresa al inicio, es una base divertida para aprender sobre mapas y estrategias. ¡Prepara tu mochila, carga el laberinto y encuentra la salida!
+
+GraphQuest es una aventura donde tus decisiones importan: ¿llevas esa espada pesada o la dejas? ¿resuelves un acertijo para encontrar el camino? Con su laberinto dinámico, pistas ingeniosas y tabla de resultados, te reta a ser un explorador astuto. Aunque tiene algunos errores, como el menú final que no regresa al inicio, es una base divertida para aprender sobre mapas y estrategias.
