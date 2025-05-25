@@ -2,31 +2,37 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <conio.h> // para getch() en windows, lee teclas
+#include <conio.h> // Para getch() en Windows
 #include "list.h"
 #include "stack.h"
 #include "map.h"
 #include "queue.h"
 #include "extra.h"
 
-// esto es como una caja para guardar un objeto, como un cuchillo o una joya
+/*
+Comenzaremos con definir nuestras estructuras de datos para el juego , de manera que tengamos 
+
+nuestras habitaciones, objetos y jugadores listos para interactuar y de forma bien organizada
+*/
+
+// La primera estructura es para los objetos que el jugador puede recoger.
 typedef struct {
     char name[50]; // aqui va el nombre del objeto, maximo 50 letras
     float weight; // el peso, puede tener decimales
     int value; // los puntos que vale
 } Item;
 
-// esto es como una habitacion del laberinto, con sus detalles
+// La siguiente estructura representará la habitación del laberinto, con sus detalles
 typedef struct {
     int id; // un numero unico para la habitacion
-    char name[100]; // el nombre, maximo 100 letras
-    char description[300]; // una descripcion larga, maximo 300 letras
+    char name[100]; // el nombre
+    char description[300]; // una descripcion larga, 
     int is_final; // 1 si es el final del juego, 0 si no
     int up, down, left, right; // numeros de las habitaciones vecinas, -1 si no hay camino
-    List* items; // lista de objetos en la habitacion
+    List* items; // lista de objetos en la habitacion declarada anteriormente
 } Scenario;
 
-// esto es como la ficha de un jugador, guarda todo lo que lleva
+// y por ultimo una estructura para los jugadores, la cual guardara todo lo que llevan
 typedef struct {
     int current_scenario; // en que habitacion esta
     List* inventory; // su mochila con objetos
@@ -36,7 +42,7 @@ typedef struct {
     Stack* path; // una pila con el camino que ha seguido
 } Player;
 
-// prototipos, como una lista de funciones que usaremos mas adelante
+// Aqui procederemos a declarar todos los prototipos de las funciones que usaremos mas adelante
 int int_equal(void* key1, void* key2);
 void print_items(List* items);
 void wait_for_key(void);
@@ -47,52 +53,48 @@ void initialize_player(Player* p);
 void display_state(Map* scenarios, Player* p, int player_id);
 void manage_items(Map* scenarios, Player* p, int collect);
 void display_final_scores(Player* players, int num_players, int winner_id);
-void move(Map* scenarios, Player* p, Player* players, int num_players, int player_id, Queue* turns, int* running);
+void move(Map* scenarios, Player* p, Player* players, int num_players, int player_id);
 void show_hints(Player* p);
 void free_resources(Map* scenarios, Player* players, int num_players);
 
 /*
- * oye, esta funcion la hicimos para comparar dos numeros y ver si son iguales
- * es como mirar dos tarjetas y checar si tienen el mismo numero
+La siguiente funcion se encargara de comparar dos numeros y ver si son iguales
  */
 int int_equal(void* key1, void* key2) {
-    return *(int*)key1 == *(int*)key2; // comparamos los valores
+    return *(int*)key1 == *(int*)key2;
 }
 
 /*
- * esta funcion la hicimos para mostrar los objetos que hay en una lista
- * imagina que abres una caja y lees lo que tiene dentro
+ * esta funcion la hicimos para mostrar los objetos que hay en una lista, en este caso seria los items que se encuentran en el suelo
  */
 void print_items(List* items) {
     if (!list_size(items)) { // si no hay nada en la lista
         printf("Ninguno");
         return; // nos salimos
     }
-    void* ptr = list_first(items); // tomamos el primer objeto
-    while (ptr) { // mientras haya objetos
+    void* ptr = list_first(items); //  luego tomamos el primer objeto
+    while (ptr) { // y mientras haya items en el suelo
         Item* item = (Item*)ptr; // lo convertimos a objeto
         printf("%s (%.1f kg, %d pts)", item->name, item->weight, item->value);
         ptr = list_next(items); // pasamos al siguiente
-        if (ptr) printf(", "); // ponemos una coma si hay mas
+        if (ptr) printf(", "); // ponemos una coma si hay mas para mostrarlos de forma ordenada.
     }
 }
 
 /*
- * esta funcion hace que el juego espere a que presiones una tecla
- * es como pausar hasta que toques el teclado
+esta funcion hace que el juego espere a que el jugador presione una tecla, se crea para simular como una especie de pausa hasta que se presione el teclado
  */
 void wait_for_key() {
     printf("Presiona una tecla para continuar...\n");
-    getch(); // esperamos una tecla
-    while (kbhit()) getch(); // limpiamos teclas extras
+    getch(); // Consumir una tecla
+    while (kbhit()) getch(); // Limpiar cualquier tecla adicional en el buffer // limpiamos teclas extras
 }
 
 /*
- * esta funcion la hicimos para pedir un numero y asegurarnos que sea valido
- * es como pedirle a un amigo que elija entre 1 y 4, y no aceptar cosas raras
+la siguiente funcion se hizo con la finalidad de pedir un numero y asegurarnos que sea valido, esto para que el jugador no ingrese un numero fuera de rango o algo que no sea un numero
  */
 int read_valid_option(int min, int max, const char* prompt, const char* error_msg) {
-    char buffer[100]; // espacio para lo que escribe el jugador
+    char buffer[100]; // primero creamos un buffer (lo que llamamos espacio de memoria) para lo que escribe el jugador
     int choice; // aqui guardamos el numero que elige
     while (1) { // repetimos hasta que sea correcto
         printf("%s", prompt);
@@ -105,7 +107,7 @@ int read_valid_option(int min, int max, const char* prompt, const char* error_ms
             printf("%s", error_msg);
             continue; // pedimos otra vez
         }
-        if (sscanf(buffer, "%d", &choice) != 1) { // intentamos hacer numero
+        if (sscanf(buffer, "%d", &choice) != 1) { // intentamos hacer numero 
             printf("%s", error_msg);
             continue; // si no es numero, pedimos otra vez
         }
@@ -119,8 +121,7 @@ int read_valid_option(int min, int max, const char* prompt, const char* error_ms
 }
 
 /*
- * esta funcion hace que el jugador vea el menu final y elija
- * es como mostrarle dos opciones al terminar el juego
+ahora esta funcion se encargara de que el jugador vea el menu final y elija entre salir del juego o volver al menu principal
  */
 int show_end_menu() {
     return read_valid_option(1, 2, 
@@ -129,30 +130,23 @@ int show_end_menu() {
 }
 
 /*
- * oye, esta funcion la hicimos para leer el laberinto desde un archivo
- * es como abrir un cuaderno con instrucciones y guardar cada habitacion
+ya teniendo las funciones mas generales, creamos la funcion encargadda de la lectura del archivo , el cual es en principio un data frame que contiene la estrcutura del laberitno que usaremos para el juego
  */
 void load_graph_from_csv(Map* scenarios, int* scenario_count) {
-    FILE* archivo = fopen("graphquest.csv", "r"); // abrimos el archivo
+    FILE* archivo = fopen("graphquest.csv", "r"); // aqui primero abrimos el archivo
     if (!archivo) { // si no se pudo abrir
         printf("ERROR: No se pudo abrir el archivo graphquest.csv\n");
         return; // nos salimos
     }
 
-    char line[500]; // espacio para leer una linea
-    if (!fgets(line, sizeof(line), archivo)) { // saltamos la primera linea
-        fclose(archivo); // cerramos el archivo
-        return; // nos salimos
-    }
+    char** campos;
+    fgets(malloc(500), 500, archivo); // Saltar encabezado CSV // luego creamos un espacio para leer una linea // si no se pudo leer la primera linea 
 
-    char** campos; // para guardar las partes de cada linea
     while ((campos = leer_linea_csv(archivo, ',')) != NULL) { // leemos cada linea
         Scenario* escenario = (Scenario*)malloc(sizeof(Scenario)); // creamos una habitacion
         escenario->id = atoi(campos[0]); // guardamos su numero
-        strncpy(escenario->name, campos[1], 99); // copiamos el nombre, maximo 99 letras
-        escenario->name[99] = '\0'; // ponemos un final al nombre
-        strncpy(escenario->description, campos[2], 299); // copiamos la descripcion
-        escenario->description[299] = '\0'; // ponemos un final a la descripcion
+        strcpy(escenario->name, campos[1]); // copiamos el nombre, maximo con un maximo de 99 letras(esto se puede adaptar a gusto del que lo quiera modificar)
+        strcpy(escenario->description, campos[2]); // copiamos la descripcion
         escenario->is_final = atoi(campos[8]); // 1 si es el final, 0 si no
         escenario->items = list_create(); // creamos una lista para objetos
         escenario->up = atoi(campos[4]); // habitacion arriba
@@ -166,27 +160,24 @@ void load_graph_from_csv(Map* scenarios, int* scenario_count) {
             List* valores = split_string(item_str, ","); // separamos nombre, valor, peso
             char* nombre = list_first(valores); // tomamos el nombre
             int valor = atoi(list_next(valores)); // tomamos el valor
-            float peso = atof(list_next(valores)); // tomamos el peso, con decimales
+            int peso = atoi(list_next(valores)); // tomamos el peso, con decimales
 
             Item* item = (Item*)malloc(sizeof(Item)); // creamos un objeto
-            strncpy(item->name, nombre, 49); // copiamos el nombre, maximo 49 letras
-            item->name[49] = '\0'; // ponemos un final al nombre
+            strcpy(item->name, nombre); // copiamos el nombre, maximo 49 letras
             item->value = valor; // guardamos el valor
             item->weight = peso; // guardamos el peso
 
             list_pushBack(escenario->items, item); // ponemos el objeto en la habitacion
 
             list_clean(valores); // limpiamos la lista de valores
-            free(valores); // liberamos memoria
+            free(valores); // liberamos la memoria
         }
 
         list_clean(items_csv); // limpiamos la lista de objetos
         free(items_csv); // liberamos memoria
 
-        int* key = malloc(sizeof(int)); // creamos un numero para la habitacion
-        *key = escenario->id; // guardamos el numero
-        map_insert(scenarios, key, escenario); // guardamos la habitacion
-        (*scenario_count)++; // contamos una habitacion mas
+        map_insert(scenarios, &escenario->id, escenario); // luego guardamos la habitacion en el mapa
+        (*scenario_count)++; // contamos una habitacion mas si se cargo bien y printeamos un mensaje que indica que se cargo
 
         printf("Escenario ID %d cargado: %s\n", escenario->id, escenario->name);
     }
@@ -195,8 +186,8 @@ void load_graph_from_csv(Map* scenarios, int* scenario_count) {
 }
 
 /*
- * esta funcion la hicimos para preparar a un jugador nuevo
- * es como darle una mochila vacia y ponerlo en la primera habitacion
+esta funcion se encargara de preparar a un nuevo jugador, es decir, se
+inicializa su mochila, su puntaje, el tiempo que le queda y la habitacion en la que empieza
  */
 void initialize_player(Player* p) {
     p->current_scenario = 1; // empezamos en la habitacion 1
@@ -204,275 +195,334 @@ void initialize_player(Player* p) {
     p->total_weight = 0.0; // la mochila no pesa nada
     p->total_score = 0; // tiene 0 puntos
     p->time_left = 10; // le damos 10 turnos
-    p->path = stack_create(NULL); // creamos una pila para su camino
-    int* id = malloc(sizeof(int)); // creamos un numero
+    p->path = stack_create(NULL); // creamos una pila para su camino ya que el jugador puede volver a habitaciones anteriores
+    int* id = malloc(sizeof(int)); // creamos un numero ya que la pila guarda numeros en vez de objetos siendo es un poco mas eficiente en este caso
     *id = 1; // ponemos la habitacion 1
     stack_push(p->path, id); // guardamos la habitacion
 }
 
 /*
- * esta funcion hace que el jugador vea donde esta y que lleva
- * es como mostrarle un mapa de la habitacion y su mochila
+la siguiente funcion hace que el jugador vea donde esta y que lleva
+es como mostrarle un mapa de la habitacion y su mochila
  */
 void display_state(Map* scenarios, Player* p, int player_id) {
-    limpiarPantalla(); // limpiamos la pantalla
-    MapPair* pair = map_search(scenarios, &p->current_scenario); // buscamos la habitacion
+    limpiarPantalla(); //primero limpiamos la pantalla
+    MapPair* pair = map_search(scenarios, &p->current_scenario); //aqui  buscamos el escenario actual del jugador en el mapa de escenarios
     if (!pair) { // si no la encontramos
         printf("Error: Escenario ID %d no encontrado.\n", p->current_scenario);
         return; // nos salimos
     }
-    Scenario* s = (Scenario*)pair->value; // tomamos la habitacion
-    printf("\n=== Jugador %d ===\n", player_id);
-    printf("Escenario: %s\n", s->description);
-    printf("Elementos: ");
-    print_items(s->items);
-    printf("\nTiempo restante: %d\n", p->time_left);
-    printf("Inventario: ");
-    print_items(p->inventory);
-    printf("\nPeso total: %.1f kg, Puntaje: %d\n", p->total_weight, p->total_score);
-    printf("Direcciones: ");
-    if (s->up != -1) printf("Arriba ");
-    if (s->down != -1) printf("Abajo ");
-    if (s->left != -1) printf("Izquierda ");
-    if (s->right != -1) printf("Derecha ");
-    printf("\n");
+    Scenario* s = (Scenario*)pair->value; //Obtenemos el puntero al escenario actual desde el MapPair
+
+    printf("\n=== Jugador %d ===\n", player_id); // Muestra el número de jugador
+    printf("Escenario: %s\n", s->description); // Muestra la descripción del escenario actual
+
+    printf("Elementos: "); // Encabezado para los elementos del escenario
+    print_items(s->items); // Imprime los ítems disponibles en el escenario
+
+    printf("\nTiempo restante: %d\n", p->time_left); // Muestra el tiempo restante del jugador
+
+    printf("Inventario: "); // Encabezado del inventario del jugador
+    print_items(p->inventory); // Muestra los ítems en el inventario del jugador
+
+    printf("\nPeso total: %.1f kg, Puntaje: %d\n", p->total_weight, p->total_score); // Muestra el peso acumulado y el puntaje del jugador
+
+    printf("Direcciones: "); // Encabezado para las direcciones disponibles
+    if (s->up != -1) printf("Arriba "); // Muestra dirección arriba si es válida
+    if (s->down != -1) printf("Abajo "); // Muestra dirección abajo si es válida
+    if (s->left != -1) printf("Izquierda "); // Muestra dirección izquierda si es válida
+    if (s->right != -1) printf("Derecha "); // Muestra dirección derecha si es válida
+    printf("\n"); // Salto de línea final
 }
 
 /*
- * oye, esta funcion la hicimos para que el jugador recoja o tire objetos
- * es como abrir la mochila y decidir que guardar o que dejar
+esta funcionse encargara de mostrar los objetos que hay en el escenario y en la mochila , dando opcon al jugador de recoger o tirar objetos
  */
 void manage_items(Map* scenarios, Player* p, int collect) {
-    MapPair* pair = map_search(scenarios, &p->current_scenario); // buscamos la habitacion
-    if (!pair) return; // si no la encontramos, salimos
-    Scenario* s = (Scenario*)pair->value; // tomamos la habitacion
-    List* source = collect ? s->items : p->inventory; // elegimos de donde tomar objetos
-    if (!list_size(source)) { // si no hay objetos
+    // primero buscamos el escenario actual del jugador en el mapa
+    MapPair* pair = map_search(scenarios, &p->current_scenario); 
+    if (!pair) return; // si no lo encontramos, no seguimos porque no hay donde interactuar
+
+    // sacamos el escenario desde el MapPair y lo casteamos (aqui cabe destacar que el value viene como void*)
+    Scenario* s = (Scenario*)pair->value; 
+
+    // si collect es 1 vamos a tomar cosas del escenario, si es 0 soltamos cosas al escenario
+    List* source = collect ? s->items : p->inventory; 
+
+    // si la lista está vacía (no hay nada que recoger o soltar), se lo avisamos al jugador
+    if (!list_size(source)) {
         printf("%s vacio.\n", collect ? "Escenario" : "Inventario");
-        wait_for_key();
-        return; // nos salimos
+        wait_for_key(); // esperamos que presione una tecla para que vea el mensaje
+        return;
     }
+
+    // mostramos los items que puede elegir
     printf("%s:\n", collect ? "Items disponibles" : "Inventario");
-    void* ptr = list_first(source); // tomamos el primer objeto
-    int i = 1; // contador para numerar
-    List* indices = list_create(); // lista para los numeros
-    while (ptr) { // mientras haya objetos
-        Item* item = (Item*)ptr; // lo convertimos a objeto
-        printf("%d. %s (%.1f kg, %d pts)\n", i, item->name, item->weight, item->value);
-        int* index = malloc(sizeof(int)); // creamos un numero
-        *index = i++; // guardamos el numero
-        list_pushBack(indices, index); // lo ponemos en la lista
-        ptr = list_next(source); // pasamos al siguiente
+
+    // empezamos desde el primer item de la lista (list_first devuelve un void*, así que necesitamos castearlo después)
+    void* ptr = list_first(source);
+    int i = 1; // numerador para mostrar opciones tipo 1, 2, 3...
+    List* indices = list_create(); // esta de aqui es una lista auxiliar donde guardamos los números que mostramos, para validar opciones
+
+    while (ptr) {
+        Item* item = (Item*)ptr; // casteamos el void* a Item* para poder acceder a nombre, peso y valor
+        printf("%d. %s (%.1f kg, %d pts)\n", i, item->name, item->weight, item->value); // mostramos info del item
+
+        int* index = malloc(sizeof(int)); // reservamos memoria para guardar ese número
+        *index = i++; // le damos valor y lo incrementamos para el próximo
+        list_pushBack(indices, index); // lo metemos en la lista de indices
+
+        ptr = list_next(source); // pasamos al siguiente ítem
     }
-    int choice; // para la eleccion del jugador
+
+    int choice; // aqui vamos a guardar la opción del jugador
+
     do {
+        // pedimos al jugador que elija un item (0 para salir). Validamos que elija bien.
         choice = read_valid_option(0, list_size(indices), 
             "Seleccione item (0 para terminar): ",
             "Seleccion invalida. Por favor, ingrese un numero valido.\n");
-        if (choice == 0) break; // si elige 0, terminamos
-        ptr = list_first(source); // volvemos al primer objeto
-        for (i = 1; i < choice && ptr; i++) ptr = list_next(source); // buscamos el objeto
-        if (ptr) { // si lo encontramos
-            Item* item = (Item*)ptr; // lo convertimos a objeto
-            if (collect) { // si recogemos
-                Item* new_item = (Item*)malloc(sizeof(Item)); // creamos un objeto nuevo
-                strncpy(new_item->name, item->name, 49); // copiamos el nombre
-                new_item->name[49] = '\0'; // ponemos un final
-                new_item->weight = item->weight; // copiamos el peso
-                new_item->value = item->value; // copiamos el valor
-                list_pushBack(p->inventory, new_item); // ponemos en la mochila
-                list_popCurrent(source); // quitamos del suelo
-                free(item); // liberamos el objeto viejo
-                p->total_weight += new_item->weight; // sumamos peso
-                p->total_score += new_item->value; // sumamos puntos
-            } else { // si tiramos
-                list_popCurrent(source); // quitamos de la mochila
-                p->total_weight -= item->weight; // restamos peso
-                p->total_score -= item->value; // restamos puntos
-                free(item); // liberamos el objeto
+
+        if (choice == 0) break; // si elige 0, termina la acción
+
+        ptr = list_first(source); // volvemos al inicio de la lista
+        for (i = 1; i < choice && ptr; i++) ptr = list_next(source); // avanzamos hasta el item elegido
+
+        if (ptr) {
+            Item* item = (Item*)ptr; // casteamos el puntero al tipo correcto
+
+            if (collect) {
+                // si estamos recogiendo un item, lo duplicamos porque el original se va a eliminar
+                Item* new_item = (Item*)malloc(sizeof(Item)); // pedimos espacio para el nuevo item
+
+                // copiamos los datos manualmente. No usamos el mismo puntero porque lo vamos a liberar más abajo
+                strcpy(new_item->name, item->name); 
+                new_item->weight = item->weight;
+                new_item->value = item->value;
+
+                list_pushBack(p->inventory, new_item); // lo metemos en la mochila
+                list_popCurrent(source); // lo sacamos del escenario
+                free(item); // liberamos la memoria del item original
+
+                // actualizamos peso y puntaje del jugador
+                p->total_weight += new_item->weight;
+                p->total_score += new_item->value;
+            } else {
+                // si estamos soltando un item, simplemente lo sacamos del inventario
+                list_popCurrent(source); 
+                p->total_weight -= item->weight;
+                p->total_score -= item->value;
+                free(item); // liberamos el item porque ya no lo necesitamos
             }
         }
-    } while (choice > 0); // repetimos hasta que elija 0
-    list_clean(indices); // limpiamos los numeros
-    free(indices); // liberamos memoria
-    p->time_left--; // quitamos un turno
-    wait_for_key();
+
+    } while (choice > 0); // seguimos preguntando hasta que el jugador diga que no quiere más
+
+    // al final liberamos la lista de índices auxiliares
+    list_clean(indices);
+    free(indices);
+
+    p->time_left--; // cada acción (recoger o soltar) consume 1 unidad de tiempo
+    wait_for_key(); // pausa para que el jugador pueda ver lo que pasó antes de continuar
 }
 
 /*
- * esta funcion hace que veamos los puntajes al final
- * es como mostrar una tabla con los resultados del juego
+esta funcion hace que veamos los puntajes al final , es una tabla que mostrara de forma ordenada  los resultados del juego, aginando nombres, puntajes y niveles.
  */
 void display_final_scores(Player* players, int num_players, int winner_id) {
-    printf("\n¡Luz al final del túnel! Pero cuidado... hay salidas que son más trampas que finales felices.\n");
+    printf("\n¡Luz al final del túnel! Pero cuidado... hay salidas que son más trampas que finales felices.\n"); // mensaje final extraido del data frame.
+    printf("+---------+---------+--------+\n"); // parte de arriba de la tabla
+    printf("| Jugador | Puntaje | Nivel  |\n"); // encabezados
     printf("+---------+---------+--------+\n");
-    printf("| Jugador | Puntaje | Nivel  |\n");
-    printf("+---------+---------+--------+\n");
-    for (int i = 0; i < num_players; i++) { // para cada jugador
-        const char* level; // para el nivel (oro, plata, bronce)
-        if (players[i].total_score > 70) level = "Oro"; // mas de 70 es oro
-        else if (players[i].total_score >= 30) level = "Plata"; // 30 o mas es plata
-        else level = "Bronce"; // menos de 30 es bronce
-        printf("| %d       | %d      | %s    |\n", i + 1, players[i].total_score, level);
+
+    for (int i = 0; i < num_players; i++) { // recorremos cada jugador
+        const char* level; // para guardar el nivel tipo "Oro", "Plata", "Bronce"
+
+        if (players[i].total_score > 70) level = "Oro"; // si hizo más de 70 pts, es oro
+        else if (players[i].total_score >= 30) level = "Plata"; // si hizo entre 30 y 70, plata
+        else level = "Bronce"; // menos de 30, bronce
+        printf("| %d       | %d      | %s    |\n", i + 1, players[i].total_score, level); // mostramos todo bien ordenadito al final.
     }
-    printf("+---------+---------+--------+\n");
-    if (winner_id != 0) { // si alguien gano
-        printf("Jugador %d ha ganado!\n", winner_id);
-    } else { // si nadie gano
-        printf("Tiempo agotado. Nadie ha ganado.\n");
+
+    printf("+---------+---------+--------+\n"); 
+
+    if (winner_id != 0) { // si hay un ID de ganador distinto de 0
+        printf("Jugador %d ha ganado!\n", winner_id); // lo celebramos
+    } else { // si no hay ganador (por tiempo o lo que sea)
+        printf("Tiempo agotado. Nadie ha ganado.\n"); // imprimimos un menasje que lo indique
     }
 }
 
 /*
- * oye, esta funcion la hicimos para mover al jugador por el laberinto
- * es como dejarlo caminar usando las teclas w, s, a, d
+la sigueinte funcion la hicimos para mover al jugador por el laberinto
+aginadno las teclas w, s, a, d para arriba, abajo, izquierda y derecha respectivamente, de forma que sea mas intuitivo para el jugador.
  */
-void move(Map* scenarios, Player* p, Player* players, int num_players, int player_id, Queue* turns, int* running) {
-    MapPair* pair = map_search(scenarios, &p->current_scenario); // buscamos donde esta
-    if (!pair) { // si no lo encontramos
+void move(Map* scenarios, Player* p, Player* players, int num_players, int player_id) {
+    // primero buscamos el escenario actual del jugador en el mapa (usamos un puntero a MapPair porque map_search devuelve eso)
+    MapPair* pair = map_search(scenarios, &p->current_scenario); 
+    if (!pair) { // si no encontramos el escenario actual, algo anda mal
         printf("Error: Escenario ID %d no encontrado.\n", p->current_scenario);
-        return; // nos salimos
+        return; //entonces no hacemos nada
     }
-    Scenario* s = (Scenario*)pair->value; // tomamos la habitacion
-    int valid_move = 0; // para saber si el movimiento es bueno
+
+    // accedemos a la habitación desde el par (value es un void*, así que lo casteamos a Scenario*)
+    Scenario* s = (Scenario*)pair->value;
+    int valid_move = 0; // usamos esta bandera para saber si el movimiento fue válido
+
     do {
+        // mostramos las opciones de movimiento al jugador
         printf("Presione: w (Arriba), s (Abajo), a (Izquierda), d (Derecha), cualquier otra tecla para cancelar\n");
         char key = getch(); // leemos la tecla
-        int new_scenario = -1; // para la nueva habitacion
-        char* direction = NULL; // para la direccion
-        switch (key) { // segun la tecla
+        int new_scenario = -1; // inicializamos el nuevo escenario a -1 (no hay camino)
+        char* direction = NULL; //creamos esta variable para mostrar un mensaje si no hay camino
+
+        // determinamos la dirección según la tecla presionada
+        switch (key) {
             case 'w': case 'W':
-                new_scenario = s->up; // arriba
+                new_scenario = s->up;
                 direction = "Arriba";
                 break;
             case 's': case 'S':
-                new_scenario = s->down; // abajo
+                new_scenario = s->down;
                 direction = "Abajo";
                 break;
             case 'a': case 'A':
-                new_scenario = s->left; // izquierda
+                new_scenario = s->left;
                 direction = "Izquierda";
                 break;
             case 'd': case 'D':
-                new_scenario = s->right; // derecha
+                new_scenario = s->right;
                 direction = "Derecha";
                 break;
             default:
+                // si presiona otra cosa, se cancela el movimiento
                 printf("\nMovimiento cancelado.\n");
                 wait_for_key();
-                return; // salimos si no es una tecla valida
+                return;
         }
-        if (new_scenario != -1) { // si hay camino
-            int time_cost = (int)ceil((p->total_weight + 1) / 10.0); // calculamos turnos que cuesta
-            if (p->time_left <= time_cost) { // si no queda tiempo
+
+        if (new_scenario != -1) {
+            // calculamos cuántos turnos cuesta moverse, dependiendo del peso total
+            int time_cost = (int)ceil((p->total_weight + 1) / 10.0);
+            
+            if (p->time_left <= time_cost) {
+                // si no tiene tiempo suficiente, se acaba el juego para él
                 printf("\nTiempo agotado! Has perdido.\n");
-                display_final_scores(players, num_players, 0);
-                wait_for_key();
-                int choice = show_end_menu(); // mostramos el menu final
-                if (choice == 1) { // si quiere volver al menu
-                    free_resources(NULL, players, num_players); // limpiamos jugadores
-                    queue_clean(turns); // limpiamos turnos
-                    free(turns); // liberamos turnos
-                    *running = 1; // decimos que siga el juego
-                    return; // volvemos al menu
-                }
-                *running = 0; // decimos que el juego termino
-                return; // salimos
+                display_final_scores(players, num_players, 0); // esto indica que no hay ganador
+                wait_for_key(); // pausa para que el jugador pueda ver el mensaje
+
+                // mostramos el menú final y terminamos el programa
+                int choice = show_end_menu();
+                if (choice == 1) exit(0);
+                return;
             }
-            MapPair* new_pair = map_search(scenarios, &new_scenario); // buscamos la nueva habitacion
-            if (!new_pair) { // si no existe
+
+            // buscamos la nueva habitación en el mapa (otro puntero a MapPair)
+            MapPair* new_pair = map_search(scenarios, &new_scenario);
+            if (!new_pair) {
                 printf("Error: Nuevo escenario ID %d no encontrado.\n", new_scenario);
-                return; // salimos
+                return;
             }
-            p->current_scenario = new_scenario; // movemos al jugador
-            p->time_left -= time_cost; // quitamos turnos
-            int* id = malloc(sizeof(int)); // creamos un numero
-            *id = new_scenario; // guardamos la habitacion
-            stack_push(p->path, id); // ponemos en el camino
-            Scenario* new_s = (Scenario*)new_pair->value; // tomamos la nueva habitacion
-            valid_move = 1; // marcamos que el movimiento es bueno
-            if (new_scenario == 16 || new_s->is_final) { // si llegamos al final
+
+            // movemos al jugador al nuevo escenario
+            p->current_scenario = new_scenario;
+            p->time_left -= time_cost;
+
+            // aquí usamos malloc para guardar el camino recorrido (memoria dinámica para un entero)
+            int* id = malloc(sizeof(int)); 
+            *id = new_scenario;
+            stack_push(p->path, id); // agregamos al stack el nuevo escenario visitado
+
+            // accedemos a los datos del nuevo escenario
+            Scenario* new_s = (Scenario*)new_pair->value;
+            valid_move = 1;
+
+            // si llegamos al escenario final (por ID o bandera), el jugador gana
+            if (new_scenario == 16 || new_s->is_final) {
                 printf("\n+----------------------------------+\n");
                 printf("| ¡HAZ GANADO!                     |\n");
                 printf("| Eres un explorador indomable     |\n");
                 printf("+----------------------------------+\n");
                 printf("Presiona una tecla para ver los resultados...\n");
                 wait_for_key();
+
+                // mostramos los puntajes finales e inventario
                 display_final_scores(players, num_players, player_id);
                 printf("Inventario: ");
                 print_items(p->inventory);
                 printf("\nPuntaje: %d\n", p->total_score);
                 wait_for_key();
-                int choice = show_end_menu(); // mostramos el menu final
-                if (choice == 1) { // si quiere volver al menu
-                    free_resources(NULL, players, num_players); // limpiamos jugadores
-                    queue_clean(turns); // limpiamos turnos
-                    free(turns); // liberamos turnos
-                    *running = 1; // decimos que siga el juego
-                    return; // volvemos al menu
-                }
-                *running = 0; // decimos que el juego termino
-                return; // salimos
+
+                // menú final otra vez
+                int choice = show_end_menu();
+                if (choice == 1) exit(0);
+                return;
             }
-        } else { // si no hay camino
+        } else {
+            // si no hay camino en esa dirección, avisamos
             printf("\nNo hay camino hacia %s. Intenta de nuevo.\n", direction);
             wait_for_key();
         }
-    } while (!valid_move); // repetimos hasta movernos
+    } while (!valid_move); // aqui esta condicion nos permitira repetir la funcion hasta lograr un movimiento válido
 }
 
 /*
- * esta funcion la hicimos para darle pistas al jugador
- * es como darle un libro con trucos para ganar
+Esta función proporciona pistas al jugador para ayudarlo a resolver el laberinto, ofreciendo acertijos matemáticos que desbloquean caminos específicos si se resuelven correctamente.
  */
 void show_hints(Player* p) {
-    limpiarPantalla();
-    printf("\n=== Pistas para la Gloria ===\n");
-    printf("Resuelve el puntaje de cada nivel para desbloquear su camino.\n");
-    printf("Cada intento consume 1 unidad de tiempo. Tiempo actual: %d\n\n", p->time_left);
+    limpiarPantalla(); // Limpiamos la pantalla para mostrar solo la información relevante
+    printf("\n=== Pistas para la Gloria ===\n"); // Título de la sección de pistas
+    printf("Resuelve el puntaje de cada nivel para desbloquear su camino.\n"); // Explicamos al jugador que debe resolver acertijos
+    printf("Cada intento consume 1 unidad de tiempo. Tiempo actual: %d\n\n", p->time_left); // Mostramos el tiempo restante
 
-    int choice; // para elegir el nivel
+    int choice; // Variable para almacenar la opción elegida por el jugador
     do {
+        // Pedimos al jugador que seleccione un nivel de dificultad (Oro, Plata, Bronce) o salir
         choice = read_valid_option(0, 3, 
             "Seleccione nivel (1: Oro, 2: Plata, 3: Bronce, 0: Salir): ",
             "Opcion invalida. Selecciona 1, 2, 3 o 0.\n");
-        if (choice == 0) { // si quiere salir
-            wait_for_key();
-            return; // nos salimos
+
+        if (choice == 0) { // Si elige 0, salimos de la función
+            wait_for_key(); // Esperamos una tecla antes de volver
+            return; // Terminamos la función
         }
 
-        if (p->time_left <= 0) { // si no queda tiempo
-            printf("\nTiempo agotado! Has perdido.\n");
-            wait_for_key();
-            return; // salimos
+        // Verificamos si el jugador tiene tiempo suficiente
+        if (p->time_left <= 0) { // Si no le queda tiempo
+            printf("\n¡Tiempo agotado! Has perdido.\n"); // Avisamos que perdió
+            wait_for_key(); // Pausamos
+            exit(0); // Terminamos el programa
         }
 
-        switch (choice) { // segun el nivel
-            case 1: // oro
+        // Según el nivel elegido, mostramos el acertijo correspondiente
+        switch (choice) {
+            case 1: // Nivel Oro
                 printf("\nNivel Oro:\n");
                 printf("Un tesoro crece con el cuadrado de tu camino, cuatro veces y media su peso, desde el inicio hasta cuatro pasos. Halla su valor.\n");
-                printf("(Resuelve: integral de 0 a 4 de (9/2)x^2 dx)\n");
+                printf("(Resuelve: integral de 0 a 4 de (9/2)x^2 dx)\n"); // Acertijo matemático
                 break;
-            case 2: // plata
+            case 2: // Nivel Plata
                 printf("\nNivel Plata:\n");
                 printf("Un camino plateado guarda un secreto cuadrado: su valor menos diez veces él, más veinticinco, es nada. Toma el número mayor y multiplícalo por siete.\n");
-                printf("(Resuelve: x^2 - 10x + 25 = 0, toma la raíz positiva, multiplica por 7)\n");
+                printf("(Resuelve: x^2 - 10x + 25 = 0, toma la raíz positiva, multiplica por 7)\n"); // Acertijo cuadrático
                 break;
-            case 3: // bronce
+            case 3: // Nivel Bronce
                 printf("\nNivel Bronce:\n");
                 printf("El bronce mide el cambio de un peso que crece como once y medio por el cuadrado de un paso. Encuentra su ritmo en el primer paso.\n");
-                printf("(Deriva f(x) = 11.5x^2, evalúa en x = 1)\n");
+                printf("(Deriva f(x) = 11.5x^2, evalúa en x = 1)\n"); // Acertijo de derivada
                 break;
         }
 
+        // Pedimos al jugador que ingrese la solución al acertijo
         int score = read_valid_option(INT_MIN, INT_MAX, 
             "Ingresa el puntaje: ",
             "Entrada invalida. Por favor, ingrese un numero valido.\n");
-        
-        switch (choice) { // segun el nivel
-            case 1: // oro
-                if (score == 96) { // si acierta
-                    printf("\n¡Correcto! El camino al Oro:\n");
+
+        // Verificamos si la solución es correcta según el nivel
+        switch (choice) {
+            case 1: // Nivel Oro
+                if (score == 96) { // Solución correcta: integral = 96
+                    printf("\n¡Correcto! El camino al Oro:\n"); // Mostramos la pista
                     printf("Hacia el sur da un paso, sigue la corriente.\n");
                     printf("Donde el sol sale, dos pasos has de dar,\n");
                     printf("Al sur otra vez, no dejes de avanzar.\n");
@@ -480,230 +530,230 @@ void show_hints(Player* p) {
                     printf("Sur de nuevo, y al final, la gloria hallarás.\n");
                     printf("Dos pasos al oriente, el camino cerrarás.\n");
                 } else {
-                    printf("Puntaje incorrecto. Intenta de nuevo o selecciona otro nivel.\n");
+                    printf("Puntaje incorrecto. Intenta de nuevo o selecciona otro nivel.\n"); // Solución incorrecta
                 }
                 break;
-            case 2: // plata
-                if (score == 35) { // si acierta
-                    printf("\n¡Correcto! El camino a la Plata:\n");
+            case 2: // Nivel Plata
+                if (score == 35) { // Solución correcta: x = 5, 5 * 7 = 35
+                    printf("\n¡Correcto! El camino a la Plata:\n"); // Mostramos la ruta
                     printf("Por la senda plateada, tres pasos al sur,\n");
                     printf("Donde las sombras caen, sin temor ni dolor.\n");
                     printf("Luego al oriente, tres pasos contarás,\n");
                     printf("La plata te espera, si el rumbo no errarás.\n");
                 } else {
-                    printf("Puntaje incorrecto. Intenta de nuevo o selecciona otro nivel.\n");
+                    printf("Puntaje incorrecto. Intenta de nuevo o selecciona otro nivel.\n"); // Solución incorrecta
                 }
                 break;
-            case 3: // bronce
-                if (score == 23) { // si acierta
-                    printf("\n¡Correcto! El camino al Bronce:\n");
+            case 3: // Nivel Bronce
+                if (score == 23) { // Solución correcta: f'(x) = 23x, f'(1) = 23
+                    printf("\n¡Correcto! El camino al Bronce:\n"); // Mostramos la ruta
                     printf("Por el bronce comienza, un paso al sur irás,\n");
                     printf("Al oriente un paso, donde el alba verás.\n");
                     printf("Dos pasos al sur, en la sombra avanzar,\n");
                     printf("Dos al oriente, el bronce a reclamar.\n");
                 } else {
-                    printf("Puntaje incorrecto. Intenta de nuevo o selecciona otro nivel.\n");
+                    printf("Puntaje incorrecto. Intenta de nuevo o selecciona otro nivel.\n"); // Solución incorrecta
                 }
                 break;
         }
-        p->time_left--; // quitamos un turno
-        printf("\nTiempo restante: %d\n", p->time_left);
-        wait_for_key();
-    } while (choice != 0); // repetimos hasta que salga
+
+        p->time_left--; // Cada intento consume 1 unidad de tiempo
+        printf("\nTiempo restante: %d\n", p->time_left); // Mostramos el tiempo actualizado
+        wait_for_key(); // Pausamos antes de continuar
+    } while (choice != 0); // Repetimos hasta que el jugador elija salir
 }
 
 /*
- * esta funcion la hicimos para limpiar todo lo que usamos
- * es como recoger las cosas y tirarlas cuando terminamos
+Esta función se encarga de liberar toda la memoria dinámica utilizada durante el juego, asegurando que no queden fugas de memoria al finalizar.
  */
 void free_resources(Map* scenarios, Player* players, int num_players) {
-    if (scenarios) { // si hay un mapa
-        MapPair* pair = map_first(scenarios); // tomamos la primera habitacion
-        while (pair) { // mientras haya habitaciones
-            Scenario* s = (Scenario*)pair->value; // tomamos la habitacion
-            if (s->items) { // si tiene objetos
-                void* item = list_first(s->items); // tomamos el primero
-                while (item) { // mientras haya objetos
-                    free(item); // lo tiramos
-                    item = list_next(s->items); // pasamos al siguiente
+    // Liberamos los escenarios del mapa si existe
+    if (scenarios) {
+        MapPair* pair = map_first(scenarios); // Obtenemos el primer par clave-valor
+        while (pair) { // Recorremos cada escenario en el mapa
+            Scenario* s = (Scenario*)pair->value; // Extraemos el escenario
+
+            // Liberamos los ítems del escenario
+            if (s->items) {
+                void* item = list_first(s->items); // Tomamos el primer ítem
+                while (item) { // Mientras haya ítems
+                    free(item); // Liberamos la memoria del ítem
+                    item = list_next(s->items); // Pasamos al siguiente
                 }
-                list_clean(s->items); // limpiamos la lista
-                free(s->items); // liberamos la lista
+                list_clean(s->items); // Vaciamos la lista
+                free(s->items); // Liberamos la lista
             }
-            free(pair->key); // tiramos el numero
-            free(s); // tiramos la habitacion
-            pair = map_next(scenarios); // siguiente habitacion
+
+            free(pair->key); // Liberamos la clave del escenario (ID)
+            free(s); // Liberamos la estructura del escenario
+            pair = map_next(scenarios); // Avanzamos al siguiente par
         }
-        map_clean(scenarios); // limpiamos el mapa
+        map_clean(scenarios); // Limpiamos el mapa completo
     }
-    if (players && num_players > 0) { // si hay jugadores
-        for (int i = 0; i < num_players; i++) { // para cada jugador
-            if (players[i].inventory) { // si tiene mochila
-                void* item = list_first(players[i].inventory); // tomamos el primer objeto
-                while (item) { // mientras haya objetos
-                    free(item); // lo tiramos
-                    item = list_next(players[i].inventory); // siguiente objeto
+
+    // Liberamos los recursos de los jugadores si existen
+    if (players && num_players > 0) { // Verificamos que hay jugadores
+        for (int i = 0; i < num_players; i++) { // Recorremos cada jugador
+            // Liberamos los ítems del inventario
+            if (players[i].inventory) { // Si tiene inventario
+                void* item = list_first(players[i].inventory); // Tomamos el primer ítem
+                while (item) { // Mientras haya ítems
+                    free(item); // Liberamos el ítem
+                    item = list_next(players[i].inventory); // Avanzamos
                 }
-                list_clean(players[i].inventory); // limpiamos la mochila
-                free(players[i].inventory); // liberamos la mochila
-                players[i].inventory = NULL; // marcamos como vacia
+                list_clean(players[i].inventory); // Vaciamos la lista
+                free(players[i].inventory); // Liberamos la lista
+                players[i].inventory = NULL; // Marcamos como NULL para evitar accesos inválidos
             }
-            if (players[i].path) { // si tiene camino
-                void* id = stack_pop(players[i].path); // tomamos el primer numero
-                while (id) { // mientras haya numeros
-                    free(id); // lo tiramos
-                    id = stack_pop(players[i].path); // siguiente numero
+
+            // Liberamos el camino (pila de escenarios visitados)
+            if (players[i].path) { // Si tiene un camino
+                void* id = stack_pop(players[i].path); // Sacamos el primer ID
+                while (id) { // Mientras haya IDs
+                    free(id); // Liberamos el ID
+                    id = stack_pop(players[i].path); // Sacamos el siguiente
                 }
-                stack_clean(players[i].path); // limpiamos el camino
-                free(players[i].path); // liberamos el camino
-                players[i].path = NULL; // marcamos como vacio
+                stack_clean(players[i].path); // Vaciamos la pila
+                free(players[i].path); // Liberamos la pila
+                players[i].path = NULL; // Marcamos como NULL
             }
         }
     }
 }
 
 /*
- * oye, esta funcion la hicimos para controlar todo el juego
- * es como el cerebro que dice que hacer en cada momento
+La función principal es el corazón del juego, encargada de inicializar el laberinto, gestionar el menú principal y coordinar las acciones del jugador.
  */
 int main() {
-    Map* scenarios = map_create(int_equal); // creamos un mapa para habitaciones
-    int scenario_count = 0; // contamos las habitaciones
-    int running = 1; // para saber si el juego sigue
+    // Creamos un mapa para almacenar los escenarios del laberinto
+    Map* scenarios = map_create(int_equal); // Usamos la función de comparación int_equal
+    int scenario_count = 0; // Contador de escenarios cargados
+    int running = 1; // Bandera para controlar el ciclo principal del juego (1 = activo, 0 = terminado)
 
-    load_graph_from_csv(scenarios, &scenario_count); // cargamos el laberinto
-    if (!scenario_count) { // si no se cargo
-        printf("No se cargo el laberinto. Verifique el archivo CSV.\n");
-        free_resources(scenarios, NULL, 0); // limpiamos
-        free(scenarios); // liberamos el mapa
-        return 1; // salimos con error
+    // Cargamos el laberinto desde el archivo CSV
+    load_graph_from_csv(scenarios, &scenario_count);
+    if (!scenario_count) { // Si no se cargaron escenarios
+        printf("No se cargó el laberinto. Verifique el archivo CSV.\n"); // Avisamos al jugador
+        free_resources(scenarios, NULL, 0); // Liberamos el mapa
+        free(scenarios); // Liberamos la estructura del mapa
+        return 1; // Terminamos con error
     }
 
-    while (running) { // mientras el juego siga
+    // Ciclo principal del juego
+    while (running) {
+        // Mostramos el menú principal y obtenemos la opción del jugador
         int choice = read_valid_option(1, 4, 
             "=== GraphQuest ===\n1. Cargar Laberinto\n2. Iniciar Partida\n3. Salir\n4. Pistas\nOpcion: ",
             "Entrada invalida. Por favor, ingrese un numero entre 1 y 4.\n");
-        
-        if (choice == 1) { // si quiere cargar laberinto
-            free_resources(scenarios, NULL, 0); // limpiamos el mapa viejo
-            map_clean(scenarios); // limpiamos el mapa
-            scenarios = map_create(int_equal); // creamos uno nuevo
-            scenario_count = 0; // reiniciamos el contador
-            load_graph_from_csv(scenarios, &scenario_count); // cargamos de nuevo
-            if (!scenario_count) { // si no se cargo
-                printf("No se cargo el laberinto. Verifique el archivo CSV.\n");
-            } else {
-                printf("Laberinto cargado.\n");
-            }
-            wait_for_key();
-        } else if (choice == 2) { // si quiere jugar
+
+        if (choice == 1) { // Opción 1: Cargar un nuevo laberinto
+            printf("Laberinto cargado.\n"); // Confirmamos que el laberinto ya está cargado
+            wait_for_key(); // Pausamos para que el jugador vea el mensaje
+        } else if (choice == 2) { // Opción 2: Iniciar una partida
+            // Preguntamos cuántos jugadores participarán (1 o 2)
             int num_players = read_valid_option(1, 2, 
                 "Cuantos jugadores? (1-2): ",
                 "Entrada invalida. Por favor, ingrese 1 o 2.\n");
-            
-            Player players[2] = {0}; // espacio para dos jugadores
-            Queue* turns = queue_create(NULL); // cola para turnos
-            for (int i = 0; i < num_players; i++) { // para cada jugador
-                initialize_player(&players[i]); // lo preparamos
-                queue_insert(turns, &players[i]); // lo ponemos en la cola
+
+            // Inicializamos los jugadores (máximo 2)
+            Player players[2] = {0}; // Arreglo de jugadores, inicializado en 0
+            Queue* turns = queue_create(NULL); // Creamos una cola para gestionar turnos
+            for (int i = 0; i < num_players; i++) { // Para cada jugador
+                initialize_player(&players[i]); // Configuramos su estado inicial
+                queue_insert(turns, &players[i]); // Lo añadimos a la cola de turnos
             }
-            int winner = 0; // para el ganador
-            while (running && !winner) { // mientras no haya ganador
-                Player* current_player = (Player*)queue_remove(turns); // tomamos el siguiente
-                if (!current_player) break; // si no hay, salimos
-                int player_id = (current_player == &players[0]) ? 1 : 2; // sabemos quien es
-                display_state(scenarios, current_player, player_id); // mostramos su estado
 
-                if (current_player->time_left <= 0) { // si se acabo el tiempo
-                    printf("\nTiempo agotado! Has perdido.\n");
-                    display_final_scores(players, num_players, 0);
-                    wait_for_key();
-                    int choice = show_end_menu(); // mostramos el menu final
-                    free_resources(NULL, players, num_players); // limpiamos jugadores
-                    queue_clean(turns); // limpiamos turnos
-                    free(turns); // liberamos turnos
-                    if (choice == 1) { // si quiere volver al menu
-                        running = 1; // seguimos
-                        break; // volvemos al menu
-                    }
-                    running = 0; // terminamos
-                    break;
-                }
+            int winner = 0; // Bandera para indicar si hay un ganador
+            // Ciclo de juego para los turnos de los jugadores
+            while (1) {
+                Player* current_player = (Player*)queue_remove(turns); // Sacamos el jugador actual
+                if (!current_player) break; // Si no hay jugador, salimos
+                int player_id = (current_player == &players[0]) ? 1 : 2; // Determinamos su ID (1 o 2)
 
+                // Mostramos el estado actual del jugador
+                display_state(scenarios, current_player, player_id);
+
+                // Mostramos las opciones de juego
                 int game_choice = read_valid_option(1, 6, 
                     "1. Recoger item\n2. Descartar item\n3. Moverse\n4. Volver al menu principal\n5. Reiniciar partida\n6. Pistas\nOpcion: ",
                     "Entrada invalida. Por favor, ingrese un numero entre 1 y 6.\n");
-                
-                switch (game_choice) { // segun la eleccion
-                    case 1:
-                        manage_items(scenarios, current_player, 1); // recoger objetos
+
+                // Ejecutamos la acción elegida
+                switch (game_choice) {
+                    case 1: // Recoger un ítem
+                        manage_items(scenarios, current_player, 1);
                         break;
-                    case 2:
-                        manage_items(scenarios, current_player, 0); // tirar objetos
+                    case 2: // Descartar un ítem
+                        manage_items(scenarios, current_player, 0);
                         break;
-                    case 3:
-                        move(scenarios, current_player, players, num_players, player_id, turns, &running); // moverse
-                        if (num_players == 2 && current_player->time_left > 0 && running) { // si son dos jugadores
-                            MapPair* pair = map_search(scenarios, &current_player->current_scenario); // buscamos la habitacion
-                            if (pair && (((Scenario*)pair->value)->id == 16 || ((Scenario*)pair->value)->is_final)) { // si es el final
-                                winner = player_id; // marcamos ganador
-                                display_final_scores(players, num_players, player_id);
+                    case 3: // Moverse a otra habitación
+                        move(scenarios, current_player, players, num_players, player_id);
+                        // Verificamos si el jugador llegó al final (solo en modo multijugador)
+                        if (num_players == 2 && current_player->time_left > 0) {
+                            MapPair* pair = map_search(scenarios, &current_player->current_scenario);
+                            if (pair && (((Scenario*)pair->value)->id == 16 || ((Scenario*)pair->value)->is_final)) {
+                                winner = player_id; // Marcamos al ganador
+                                display_final_scores(players, num_players, player_id); // Mostramos puntajes
                                 printf("Inventario: ");
-                                print_items(current_player->inventory);
-                                printf("\nPuntaje: %d\n", current_player->total_score);
-                                wait_for_key();
-                                int choice = show_end_menu(); // mostramos el menu final
-                                free_resources(NULL, players, num_players); // limpiamos jugadores
-                                queue_clean(turns); // limpiamos turnos
-                                free(turns); // liberamos turnos
-                                if (choice == 1) { // si quiere volver al menu
-                                    running = 1; // seguimos
-                                    break; // volvemos al menu
+                                print_items(current_player->inventory); // Mostramos su inventario
+                                printf("\nPuntaje: %d\n", current_player->total_score); // Mostramos su puntaje
+                                wait_for_key(); // Pausamos
+                                int choice = show_end_menu(); // Mostramos menú final
+                                if (choice == 1) { // Si elige volver al menú principal
+                                    queue_clean(turns);
+                                    free(turns); // Liberamos la cola
+                                    free_resources(NULL, players, num_players); // Liberamos jugadores
+                                    continue; // Volvemos al menú principal
                                 }
-                                running = 0; // terminamos
+                                queue_clean(turns);
+                                free(turns); // Liberamos la cola
+                                free_resources(NULL, players, num_players); // Liberamos jugadores
+                                free_resources(scenarios, NULL, 0); // Liberamos escenarios
+                                free(scenarios); // Liberamos el mapa
+                                running = 0; // Terminamos el juego
                                 break;
                             }
                         }
                         break;
-                    case 4: // volver al menu
-                        free_resources(NULL, players, num_players); // limpiamos jugadores
-                        queue_clean(turns); // limpiamos turnos
-                        free(turns); // liberamos turnos
-                        printf("Volviendo al menu principal...\n");
-                        wait_for_key();
-                        running = 1; // seguimos
-                        break;
-                    case 5: // reiniciar partida
-                        free_resources(NULL, players, num_players); // limpiamos jugadores
-                        queue_clean(turns); // limpiamos turnos
-                        free(turns); // liberamos turnos
-                        printf("Volviendo al menu principal...\n");
-                        wait_for_key();
-                        running = 1; // seguimos
-                        break;
-                    case 6:
-                        show_hints(current_player); // mostramos pistas
+                    case 4: // Volver al menú principal
+                        free_resources(NULL, players, num_players); // Liberamos jugadores
+                        queue_clean(turns);
+                        free(turns); // Liberamos la cola
+                        winner = 0; // Reseteamos el ganador
+                        printf("Volviendo al menu principal...\n"); // Avisamos
+                        wait_for_key(); // Pausamos
+                        goto restart_game; // Saltamos al inicio del ciclo principal
+                    case 5: // Reiniciar partida
+                        free_resources(NULL, players, num_players); // Liberamos jugadores
+                        queue_clean(turns);
+                        free(turns); // Liberamos la cola
+                        winner = 0; // Reseteamos el ganador
+                        printf("Volviendo al menu principal...\n"); // Avisamos
+                        wait_for_key(); // Pausamos
+                        goto restart_game; // Saltamos al inicio del ciclo principal
+                    case 6: // Ver pistas
+                        show_hints(current_player); // Mostramos las pistas
                         break;
                 }
-                if (winner || !running) break; // si hay ganador o terminamos, salimos
-                if (current_player->time_left > 0) queue_insert(turns, current_player); // ponemos el jugador en la cola
+
+                if (winner || !running) break; // Si hay ganador o el juego terminó, salimos
+                if (current_player->time_left > 0) queue_insert(turns, current_player); // Reinsertamos al jugador si tiene tiempo
             }
-            free_resources(NULL, players, num_players); // limpiamos jugadores
-            if (turns) { // si queda la cola
-                queue_clean(turns); // limpiamos
-                free(turns); // liberamos
-            }
-        } else if (choice == 3) { // si quiere salir
-            free_resources(scenarios, NULL, 0); // limpiamos el mapa
-            free(scenarios); // liberamos el mapa
-            running = 0; // terminamos
-        } else if (choice == 4) { // si quiere pistas
-            limpiarPantalla();
-            printf("Inicie una partida para ver las pistas.\n");
-            wait_for_key();
+restart_game:
+            continue; // Volvemos al menú principal
+        } else if (choice == 3) { // Opción 3: Salir del juego
+            free_resources(scenarios, NULL, 0); // Liberamos los escenarios
+            free(scenarios); // Liberamos el mapa
+            running = 0; // Terminamos el juego
+        } else if (choice == 4) { // Opción 4: Ver pistas sin partida
+            limpiarPantalla(); // Limpiamos la pantalla
+            printf("Inicie una partida para ver las pistas.\n"); // Avisamos que debe iniciar una partida
+            wait_for_key(); // Pausamos
         }
     }
-    free_resources(scenarios, NULL, 0); // limpiamos el mapa
-    free(scenarios); // liberamos el mapa
-    return 0; // terminamos todo
+
+    // Liberamos los recursos finales antes de terminar
+    free_resources(scenarios, NULL, 0);
+    free(scenarios); // Liberamos el mapa
+    return 0; // Terminamos el programa
 }
