@@ -41,6 +41,8 @@ Ejecuta el juego:.\tarea3.exe
 Sigue las instrucciones en pantalla para navegar por el menú y jugar.
 
 
+
+
 ¿Cómo se juega?
 
 Al iniciar GraphQuest, ves un menú principal con cuatro opciones:
@@ -52,24 +54,30 @@ Al iniciar GraphQuest, ves un menú principal con cuatro opciones:
 
 Si eliges "Iniciar Partida", decides cuántos jugadores (1 o 2). Luego, cada jugador comienza en la primera habitación con 10 turnos. En cada turno, ves:
 
-La descripción de la habitación, como "Una puerta rechinante cruje al entrar".
-Los objetos en el suelo, como una espada o un rubí, con su peso y valor en puntos.
-Tu mochila, que muestra qué llevas.
-Tu peso total, puntaje y turnos restantes.
-Las direcciones posibles: arriba, abajo, izquierda o derecha.
+-. La descripción de la habitación, como "Una puerta rechinante cruje al entrar".
+-. Los objetos en el suelo, como una espada o un rubí, con su peso y valor en puntos.
+-. Tu mochila, que muestra qué llevas.
+-. Tu peso total, puntaje y turnos restantes.
+-. Las direcciones posibles: arriba, abajo, izquierda o derecha.
 
 Tienes seis opciones en el juego:
 
-Recoger un objeto: Tomas algo del suelo, como una espada, y se añade a tu mochila. Esto suma peso y puntos, pero consume un turno.
-Descartar un objeto: Dejas algo de tu mochila en la habitación, reduciendo peso y puntos. También consume un turno.
-Moverte: Usas las teclas w (arriba), s (abajo), a (izquierda) o d (derecha) para ir a otra habitación. Moverte consume turnos según tu peso: más peso, más turnos gastas.
-Volver al menú principal: Sales de la partida y regresas al inicio.
-Reiniciar partida: Vuelves al menú principal, empezando de cero.
-Pistas: Resuelves acertijos matemáticos para obtener rutas sugeridas.
+-. Recoger un objeto: Tomas algo del suelo, como una espada, y se añade a tu mochila. Esto suma peso y puntos, pero consume un turno.
+-. Descartar un objeto: Dejas algo de tu mochila en la habitación, reduciendo peso y puntos. También consume un turno.
+-. Moverte: Usas las teclas w (arriba), s (abajo), a (izquierda) o d (derecha) para ir a otra habitación. Moverte consume turnos según tu peso: más peso, más turnos gastas.
+-. Volver al menú principal: Sales de la partida y regresas al inicio.
+-. Reiniciar partida: Vuelves al menú principal, empezando de cero.
+-. Pistas: Resuelves acertijos matemáticos para obtener rutas sugeridas.
 
-Si llegas a la habitación final, ganas, y ves tus puntos en una tabla. Si se te acaban los turnos, pierdes. En modo de dos jugadores, el primero en llegar al final gana.
+Si llegas a la habitación final, ganas, y ves tus puntos en una tabla.
+
+Si se te acaban los turnos, pierdes. En modo de dos jugadores, el primero en llegar al final gana.
+
+
 Detalles del Juego
+
 El Laberinto
+
 El laberinto es como un mapa de habitaciones conectadas. Cada habitación tiene:
 
 Un número único (como 1, 2, 16).
