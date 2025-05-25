@@ -7,9 +7,9 @@ Cómo instalar y jugar
 
 Qué necesitas:
 
-Un computador con Windows (el juego usa una librería especial para leer teclas).
-Un programa para compilar, como GCC.
-Los archivos del juego: el principal (tarea3.c), otros archivos de apoyo (list.c, map.c, heap.c, queue.c, extra.c), y el archivo del laberinto (graphquest.csv).
+- Un computador con Windows (el juego usa una librería especial para leer teclas).
+- Un programa para compilar, como GCC.
+- Los archivos del juego: el principal (tarea3.c), otros archivos de apoyo (list.c, map.c, heap.c, queue.c, extra.c), y el archivo del laberinto (graphquest.csv).
 
 (Si usas visual code studio puede clonar el link de este repositorio , compilar y con ./tarea3.exe correr el juego).
 
