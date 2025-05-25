@@ -1,13 +1,54 @@
 
-GraphQuest es un juego interactivo de consola donde exploras un laberinto, recoges objetos valiosos y buscas la salida antes de quedarte sin tiempo. Imagina que eres un aventurero en un castillo encantado: cada habitación tiene tesoros, pero moverte y llevar objetos consume turnos. Tu misión es llegar a la habitación final, que puede ser una sala especial o la habitación número 16, mientras acumulas puntos. El juego está diseñado para uno o dos jugadores, quienes toman turnos para moverse, recoger objetos o pedir pistas. Todo el laberinto se carga desde un archivo de texto, lo que hace que cada partida pueda ser única dependiendo de cómo esté configurado.
-El juego usa un mapa mental (un grafo) para conectar las habitaciones. Cada habitación puede llevar a otras por caminos hacia arriba, abajo, izquierda o derecha. Llevas una mochila donde guardas objetos, pero estos tienen peso, y cuanto más pesado lleves, más tiempo tardas en moverte. Si se te acaban los turnos, pierdes. Al final, tus puntos determinan si eres un explorador de nivel Oro, Plata o Bronce.
+GraphQuest es un juego interactivo de consola donde exploras un laberinto, recoges objetos valiosos y buscas la salida antes de quedarte sin tiempo. Imagina que eres un aventurero en un castillo encantado: cada habitación tiene tesoros, pero moverte y llevar objetos consume turnos. Tu misión es llegar a la habitación final, que puede ser una sala especial o la habitación número 16, mientras acumulas puntos. 
+El juego está diseñado para uno o dos jugadores, quienes toman turnos para moverse, recoger objetos o pedir pistas. Todo el laberinto se carga desde un archivo de texto, lo que hace que cada partida pueda ser única dependiendo de cómo esté configurado.
+El juego usa un mapa binario (un grafo) para conectar las habitaciones. Cada habitación puede llevar a otras por caminos hacia arriba, abajo, izquierda o derecha. Llevas una mochila donde guardas objetos, pero estos tienen peso, y cuanto más pesado lleves, más tiempo tardas en moverte. Si se te acaban los turnos, pierdes. Al final, tus puntos determinan si eres un explorador de nivel Oro, Plata o Bronce.
+
+Cómo instalar y jugar
+
+Qué necesitas:
+
+Un computador con Windows (el juego usa una librería especial para leer teclas).
+Un programa para compilar, como GCC.
+Los archivos del juego: el principal (tarea3.c), otros archivos de apoyo (list.c, map.c, heap.c, queue.c, extra.c), y el archivo del laberinto (graphquest.csv).
+
+(Si usas visual code studio puede clonar el link de este repositorio , compilar y con ./tarea3.exe correr el juego).
+
+
+Organiza los archivos:
+
+Pon todo en una carpeta, como C:\Users\TuNombre\tarea3.
+Dentro, crea una subcarpeta TDAs\tdas con los archivos de apoyo.
+Coloca graphquest.csv en la carpeta principal (tarea3).
+
+
+Compila el juego:
+
+Abre una terminal (como PowerShell).
+Ve a la carpeta de los archivos de apoyo:cd C:\Users\TuNombre\tarea3\TDAs\tdas
+
+
+Compila con:gcc tarea3.c list.c map.c heap.c queue.c extra.c -o tarea3.exe
+
+
+Esto crea un archivo tarea3.exe.
+
+
+Juega:
+
+Ejecuta el juego:.\tarea3.exe
+
+
+Sigue las instrucciones en pantalla para navegar por el menú y jugar.
+
+
 ¿Cómo se juega?
+
 Al iniciar GraphQuest, ves un menú principal con cuatro opciones:
 
-Cargar Laberinto: Prepara el juego leyendo el archivo del laberinto (un archivo llamado graphquest.csv).
-Iniciar Partida: Comienzas a jugar, eligiendo si eres uno o dos jugadores.
-Salir: Terminas el juego.
-Pistas: Intenta mostrarte pistas, pero necesitas estar en una partida para usarlas.
+-. Cargar Laberinto: Prepara el juego leyendo el archivo del laberinto (un archivo llamado graphquest.csv).
+-. Iniciar Partida: Comienzas a jugar, eligiendo si eres uno o dos jugadores.
+-. Salir: Terminas el juego.
+-. Pistas: Intenta mostrarte pistas, pero necesitas estar en una partida para usarlas.
 
 Si eliges "Iniciar Partida", decides cuántos jugadores (1 o 2). Luego, cada jugador comienza en la primera habitación con 10 turnos. En cada turno, ves:
 
@@ -77,40 +118,6 @@ Detallamos cómo moverte usa las teclas w, s, a, d para que sea intuitivo.
 Aclaramos por qué guardamos el camino en una pila, para que puedas volver atrás si quieres.
 
 Los comentarios son como un guía turístico: te llevan paso a paso por el código, especialmente porque los mapas y grafos pueden ser confusos. Esto ayuda a cualquiera que quiera entender o mejorar el juego, como un compañero de equipo o un profesor.
-Cómo instalar y jugar
-
-Qué necesitas:
-
-Un computador con Windows (el juego usa una librería especial para leer teclas).
-Un programa para compilar, como GCC.
-Los archivos del juego: el principal (tarea3.c), otros archivos de apoyo (list.c, map.c, heap.c, queue.c, extra.c), y el archivo del laberinto (graphquest.csv).
-
-
-Organiza los archivos:
-
-Pon todo en una carpeta, como C:\Users\TuNombre\tarea3.
-Dentro, crea una subcarpeta TDAs\tdas con los archivos de apoyo.
-Coloca graphquest.csv en la carpeta principal (tarea3).
-
-
-Compila el juego:
-
-Abre una terminal (como PowerShell).
-Ve a la carpeta de los archivos de apoyo:cd C:\Users\TuNombre\tarea3\TDAs\tdas
-
-
-Compila con:gcc tarea3.c list.c map.c heap.c queue.c extra.c -o tarea3.exe
-
-
-Esto crea un archivo tarea3.exe.
-
-
-Juega:
-
-Ejecuta el juego:.\tarea3.exe
-
-
-Sigue las instrucciones en pantalla para navegar por el menú y jugar.
 
 
 Notas importantes:
