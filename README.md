@@ -172,14 +172,20 @@ Imagina que inicias el juego:
 - Eliges "Iniciar Partida" y seleccionas 1 jugador.
 - Ves que estás en la habitación "Inicio", con una espada en el suelo (5 kg, 2 puntos). Tienes 10 turnos y puedes ir hacia abajo.
 - Escoges "Recoger item" y tomas la espada. Ahora tu mochila tiene la espada, tu peso es 5 kg, tu puntaje es 2, y te quedan 14 turnos.
-Eliges "Pistas" y seleccionas el nivel Bronce. Resuelves un acertijo (respondes 23) y obtienes una ruta: "Ve al sur, luego al este". Te quedan 8 turnos.
-Escoges "Moverse" y presionas s para ir abajo a un "Pasadizo Oscuro". Como llevas 5 kg, gastas 1 turno, quedándote con 7.
-Continúas hasta llegar a la habitación final (número 16). Ganas, y ves:¡HAZ GANADO! Eres un explorador indomable
+- Eliges "Pistas" y seleccionas el nivel Bronce. Resuelves un acertijo (respondes 23) y obtienes una ruta: "Ve al sur, luego al este". Te quedan 8 turnos.
+- Escoges "Moverse" y presionas s para ir abajo a un "Pasadizo Oscuro". Como llevas 5 kg, gastas 1 turno, quedándote con 7.
+- Continúas hasta llegar a la habitación final (número 16). Ganas, y ves:¡HAZ GANADO! Eres un explorador indomable
+
 +---------+---------+--------+
+
 | Jugador | Puntaje | Nivel  |
+
 +---------+---------+--------+
+
 | 1       | 2       | Bronce |
+
 +---------+---------+--------+
+
 Jugador 1 ha ganado!
 
 
