@@ -16,15 +16,15 @@ Qué necesitas:
 
 Organiza los archivos:
 
-Pon todo en una carpeta, como C:\Users\TuNombre\tarea3.
-Dentro, crea una subcarpeta TDAs\tdas con los archivos de apoyo.
-Coloca graphquest.csv en la carpeta principal (tarea3).
+- Pon todo en una carpeta, como C:\Users\TuNombre\tarea3.
+- Dentro, crea una subcarpeta TDAs\tdas con los archivos de apoyo.
+- Coloca graphquest.csv en la carpeta principal (tarea3).
 
 
 Compila el juego:
 
-Abre una terminal (como PowerShell).
-Ve a la carpeta de los archivos de apoyo:cd C:\Users\TuNombre\tarea3\TDAs\tdas
+- Abre una terminal (como PowerShell).
+- Ve a la carpeta de los archivos de apoyo:cd C:\Users\TuNombre\tarea3\TDAs\tdas
 
 
 Compila con:gcc tarea3.c list.c map.c heap.c queue.c extra.c -o tarea3.exe
@@ -35,10 +35,10 @@ Esto crea un archivo tarea3.exe.
 
 Juega:
 
-Ejecuta el juego:.\tarea3.exe
+- Ejecuta el juego:.\tarea3.exe
 
 
-Sigue las instrucciones en pantalla para navegar por el menú y jugar.
+- Sigue las instrucciones en pantalla para navegar por el menú y jugar.
 
 
 
@@ -47,74 +47,94 @@ Sigue las instrucciones en pantalla para navegar por el menú y jugar.
 
 Al iniciar GraphQuest, ves un menú principal con cuatro opciones:
 
--. Cargar Laberinto: Prepara el juego leyendo el archivo del laberinto (un archivo llamado graphquest.csv).
--. Iniciar Partida: Comienzas a jugar, eligiendo si eres uno o dos jugadores.
--. Salir: Terminas el juego.
--. Pistas: Intenta mostrarte pistas, pero necesitas estar en una partida para usarlas.
+- Cargar Laberinto: Prepara el juego leyendo el archivo del laberinto (un archivo llamado graphquest.csv).
+- Iniciar Partida: Comienzas a jugar, eligiendo si eres uno o dos jugadores.
+- Salir: Terminas el juego.
+/ Pistas: Intenta mostrarte pistas, pero necesitas estar en una partida para usarlas.
 
 Si eliges "Iniciar Partida", decides cuántos jugadores (1 o 2). Luego, cada jugador comienza en la primera habitación con 10 turnos. En cada turno, ves:
 
--. La descripción de la habitación, como "Una puerta rechinante cruje al entrar".
--. Los objetos en el suelo, como una espada o un rubí, con su peso y valor en puntos.
--. Tu mochila, que muestra qué llevas.
--. Tu peso total, puntaje y turnos restantes.
--. Las direcciones posibles: arriba, abajo, izquierda o derecha.
+- La descripción de la habitación, como "Una puerta rechinante cruje al entrar".
+- Los objetos en el suelo, como una espada o un rubí, con su peso y valor en puntos.
+- Tu mochila, que muestra qué llevas.
+- Tu peso total, puntaje y turnos restantes.
+- Las direcciones posibles: arriba, abajo, izquierda o derecha.
 
 Tienes seis opciones en el juego:
 
--. Recoger un objeto: Tomas algo del suelo, como una espada, y se añade a tu mochila. Esto suma peso y puntos, pero consume un turno.
--. Descartar un objeto: Dejas algo de tu mochila en la habitación, reduciendo peso y puntos. También consume un turno.
--. Moverte: Usas las teclas w (arriba), s (abajo), a (izquierda) o d (derecha) para ir a otra habitación. Moverte consume turnos según tu peso: más peso, más turnos gastas.
--. Volver al menú principal: Sales de la partida y regresas al inicio.
--. Reiniciar partida: Vuelves al menú principal, empezando de cero.
--. Pistas: Resuelves acertijos matemáticos para obtener rutas sugeridas.
+- Recoger un objeto: Tomas algo del suelo, como una espada, y se añade a tu mochila. Esto suma peso y puntos, pero consume un turno.
+- Descartar un objeto: Dejas algo de tu mochila en la habitación, reduciendo peso y puntos. También consume un turno.
+- Moverte: Usas las teclas w (arriba), s (abajo), a (izquierda) o d (derecha) para ir a otra habitación. Moverte consume turnos según tu peso: más peso, más turnos gastas.
+- Volver al menú principal: Sales de la partida y regresas al inicio.
+- Reiniciar partida: Vuelves al menú principal, empezando de cero.
+- Pistas: Resuelves acertijos matemáticos para obtener rutas sugeridas.
 
-Si llegas a la habitación final, ganas, y ves tus puntos en una tabla.
+- Si llegas a la habitación final, ganas, y ves tus puntos en una tabla.
 
-Si se te acaban los turnos, pierdes. En modo de dos jugadores, el primero en llegar al final gana.
+- Si se te acaban los turnos, pierdes. En modo de dos jugadores, el primero en llegar al final gana.
 
 
 Detalles del Juego
 
-El Laberinto
+* El Laberinto
 
 El laberinto es como un mapa de habitaciones conectadas. Cada habitación tiene:
 
-Un número único (como 1, 2, 16).
-Un nombre, como "Inicio" o "Pasadizo Oscuro".
-Una descripción que te sumerge en la aventura.
-Objetos en el suelo, como un "Cuchillo (1 kg, 10 puntos)".
-Conexiones a otras habitaciones (o ninguna, si es un callejón sin salida).
-Una marca que indica si es la habitación final.
+- Un número único (como 1, 2, 16).
+- Un nombre, como "Inicio" o "Pasadizo Oscuro".
+- Una descripción que te sumerge en la aventura.
+- Objetos en el suelo, como un "Cuchillo (1 kg, 10 puntos)".
+- Conexiones a otras habitaciones (o ninguna, si es un callejón sin salida).
+- Una marca que indica si es la habitación final.
 
 El juego lee este laberinto desde un archivo de texto (graphquest.csv). Por ejemplo, una habitación puede estar conectada solo hacia abajo, lo que significa que solo puedes moverte con la tecla s.
+
 Objetos y Mochila
-Los objetos tienen un nombre, peso (en kilogramos, como 5.0) y valor (en puntos, como 10). Al recoger un objeto, se suma a tu mochila, aumentando tu peso total y puntaje. Si lo descartas, lo dejas en la habitación y pierdes esos puntos. No hay límite de peso, lo que puede ser un problema, ya que llevar mucho peso hace que moverte consuma más turnos.
+
+- Los objetos tienen un nombre, peso (en kilogramos, como 5.0) y valor (en puntos, como 10). Al recoger un objeto, se suma a tu mochila, aumentando tu peso total y puntaje.
+- Si lo descartas, lo dejas en la habitación y pierdes esos puntos. No hay límite de peso, lo que puede ser un problema, ya que llevar mucho peso hace que moverte consuma más turnos.
+
 Turnos y Movimiento
-Empiezas con 10 turnos. Cada acción (recoger, descartar, pedir pista) gasta 1 turno. Moverte gasta turnos según tu peso: por cada 10 kg (o fracción), gastas un turno extra. Por ejemplo, si llevas 15 kg, moverte gasta 2 turnos. Esto te obliga a decidir si vale la pena llevar objetos pesados.
+
+- Empiezas con 15 turnos. Cada acción (recoger, descartar, pedir pista) gasta 1 turno.
+- Moverte gasta turnos según tu peso: por cada 10 kg (o fracción), gastas un turno extra.
+-  Por ejemplo, si llevas 15 kg, moverte gasta 2 turnos. Esto te obliga a decidir si vale la pena llevar objetos pesados.
+
 Pistas
+
 Las pistas son un sistema de ayuda. Si eliges la opción "Pistas", ves tres niveles de dificultad:
 
-Oro: Un acertijo difícil, como calcular cuánto vale un tesoro que crece según una fórmula matemática (respuesta: 96). Si aciertas, obtienes una ruta detallada, como "ve al sur, luego al este dos veces".
-Plata: Un acertijo intermedio, como resolver un enigma de números donde el resultado es 35. La ruta es menos directa pero útil.
-Bronce: Un acertijo más simple, con respuesta 23, que da una ruta básica.
+- Oro: Un acertijo difícil, como calcular cuánto vale un tesoro que crece según una fórmula matemática (respuesta: 96). Si aciertas, obtienes una ruta detallada, como "ve al sur, luego al este dos veces".
+- Plata: Un acertijo intermedio, como resolver un enigma de números donde el resultado es 35. La ruta es menos directa pero útil.
+- Bronce: Un acertijo más simple, con respuesta 23, que da una ruta básica.
 
 Cada intento consume 1 turno, y si no tienes turnos, pierdes. Las pistas están diseñadas para darte una ventaja estratégica, pero resolver los acertijos requiere pensar como matemático.
-Niveles Oro, Plata, Bronce
-Al final del juego, tus puntos determinan tu nivel:
 
-Oro (más de 70 puntos): Eres un maestro explorador, con muchos objetos valiosos.
-Plata (30 a 70 puntos): Un buen aventurero, balanceando peso y valor.
-Bronce (menos de 30 puntos): Completaste el juego, pero con pocos tesoros.
+- El puntaje se deivide en tres nivels Niveles Oro
+- Al final del juego, tus puntos determinan tu nivel:
 
-Estos niveles se inspiran en medallas deportivas, dando un sentido de logro. También se usan en las pistas para clasificar las rutas: Oro da el camino más valioso, Plata uno intermedio, y Bronce el más simple. Esto motiva a los jugadores a mejorar su estrategia y competir por el mejor nivel.
+- Oro (más de 70 puntos): Eres un maestro explorador, con muchos objetos valiosos.
+- Plata (30 a 70 puntos): Un buen aventurero, balanceando peso y valor.
+- Bronce (menos de 30 puntos): Completaste el juego, pero con pocos tesoros.
+
+Estos niveles se inspiran en medallas deportivas, dando un sentido de logro. 
+
+También se usan en las pistas para clasificar las rutas: Oro da el camino más valioso, Plata uno intermedio, y Bronce el más simple. Esto motiva a los jugadores a mejorar su estrategia y competir por el mejor nivel.
+
 Tablas para Resultados
+
 Cuando terminas el juego, ves una tabla con los resultados, algo así:
+
 +---------+---------+--------+
+
 | Jugador | Puntaje | Nivel  |
+
 +---------+---------+--------+
+
 | 1       | 80      | Oro    |
+
 | 2       | 40      | Plata  |
+
 +---------+---------+--------+
 
 La tabla organiza los puntajes de forma clara, mostrando quién jugó, cuántos puntos ganó y su nivel. Usamos este formato porque es fácil de leer en la consola, con líneas y columnas que dan orden, como un cuadro en un cuaderno. Es especialmente útil con dos jugadores, para comparar resultados.
